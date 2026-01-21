@@ -70,16 +70,27 @@
 
 @section('extra-js')
 <script>
+    let dashboardRefreshInterval = null;
+
+    // Show loading state
+    function showDashboardLoading(show = true) {
+        const productCard = document.getElementById('total-products').parentElement.parentElement;
+        const stockCard = document.getElementById('total-stock').parentElement.parentElement;
+
+        if (show) {
+            productCard.style.opacity = '0.6';
+            stockCard.style.opacity = '0.6';
+        } else {
+            productCard.style.opacity = '1';
+            stockCard.style.opacity = '1';
+        }
+    }
+
     async function loadDashboardData() {
-        const token = localStorage.getItem('api_token');
-        if (!token) return;
+        showDashboardLoading(true);
 
         try {
-            const response = await fetch('/api/products', {
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
+            const response = await fetchWithAuth('/api/products');
 
             if (response.ok) {
                 const data = await response.json();
@@ -88,12 +99,22 @@
                 document.getElementById('total-products').textContent = products.length;
                 document.getElementById('total-stock').textContent =
                     products.reduce((sum, p) => sum + p.stock, 0);
+            } else {
+                console.error('Error loading dashboard data');
             }
         } catch (error) {
             console.error('Error loading data:', error);
+        } finally {
+            showDashboardLoading(false);
         }
     }
 
+    // Load data on page load
     loadDashboardData();
+
+    // Refresh dashboard data every 5 seconds for real-time updates
+    dashboardRefreshInterval = setInterval(() => {
+        loadDashboardData();
+    }, 5000);
 </script>
 @endsection

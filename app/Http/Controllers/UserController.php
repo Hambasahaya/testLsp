@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    /**
-     * Get all users (Admin only)
-     */
+
     public function index(Request $request)
     {
         $users = User::with('role')->get();
@@ -21,22 +19,28 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Change user role (Admin only)
-     */
+
     public function changeRole(Request $request, User $user)
     {
         $validated = $request->validate([
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        // Get the role to validate it's a valid role
+
         $role = Role::find($validated['role_id']);
 
         if (!$role) {
             return response()->json([
                 'message' => 'Role tidak ditemukan',
             ], 404);
+        }
+
+
+        $authUser = auth()->user();
+        if ($authUser->id === $user->id && $authUser->hasRole('admin')) {
+            return response()->json([
+                'message' => 'Admin tidak dapat mengubah role dirinya sendiri',
+            ], 403);
         }
 
         $user->update(['role_id' => $validated['role_id']]);
@@ -47,9 +51,7 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Update user details (Admin only)
-     */
+
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
@@ -58,7 +60,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:6',
         ]);
 
-        // Hash password if provided
+
         if (!empty($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
         } else {
@@ -72,3 +74,4 @@ class UserController extends Controller
             'data' => $user->load('role'),
         ]);
     }
+}

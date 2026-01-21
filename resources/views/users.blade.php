@@ -50,10 +50,6 @@
                         <label for="edit-user-email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="edit-user-email" name="email" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit-user-password" class="form-label">Password (Kosongkan jika tidak ingin mengubah)</label>
-                        <input type="password" class="form-control" id="edit-user-password" name="password">
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -82,6 +78,21 @@
         }
     ];
 
+    let currentUser = null;
+
+    async function getCurrentUser() {
+        try {
+            const response = await fetchWithAuth('/api/auth/me');
+            if (response.ok) {
+                const data = await response.json();
+                currentUser = data.user;
+                console.log('Current User:', currentUser);
+            }
+        } catch (error) {
+            console.error('Error getting current user:', error);
+        }
+    }
+
     async function loadUsers() {
         try {
             const response = await fetchWithAuth('/api/users');
@@ -96,7 +107,14 @@
                     return;
                 }
 
-                tbody.innerHTML = users.map(user => `
+                tbody.innerHTML = users.map(user => {
+                    const isCurrentUserAdmin = currentUser && currentUser.role && currentUser.role.name === 'Admin';
+                    const isThisUserAdmin = user.role && user.role.name === 'Admin';
+                    const canChangeRole = !(isCurrentUserAdmin && isThisUserAdmin);
+
+                    console.log('User:', user.name, 'Admin:', isThisUserAdmin, 'Current User Admin:', isCurrentUserAdmin, 'Can Change:', canChangeRole);
+
+                    return `
                     <tr>
                         <td><strong>${escapeHtml(user.name)}</strong></td>
                         <td>${escapeHtml(user.email)}</td>
@@ -108,7 +126,8 @@
                         <td>
                             <select class="form-select form-select-sm" 
                                     onchange="changeRole(${user.id}, this.value)"
-                                    id="role-select-${user.id}">
+                                    id="role-select-${user.id}"
+                                    ${!canChangeRole ? 'disabled' : ''}>
                                 <option value="">-- Pilih Role --</option>
                                 ${roles.map(role => `
                                     <option value="${role.id}" 
@@ -117,14 +136,17 @@
                                     </option>
                                 `).join('')}
                             </select>
+                            ${!canChangeRole ? `<small class="text-muted d-block mt-1">Admin tidak dapat diubah</small>` : ''}
                         </td>
                         <td>
                             <div class="btn-group" role="group">
+                                ${canChangeRole ? `
                                 <button type="button" class="btn btn-sm btn-success" 
                                         onclick="saveRole(${user.id})"
                                         id="save-btn-${user.id}">
                                     <i class="fas fa-save"></i> Simpan
                                 </button>
+                                ` : ''}
                                 <button type="button" class="btn btn-sm btn-info" 
                                         onclick="openEditUserModal(${user.id}, '${escapeHtml(user.name)}', '${escapeHtml(user.email)}')">
                                     <i class="fas fa-edit"></i> Edit
@@ -132,7 +154,8 @@
                             </div>
                         </td>
                     </tr>
-                `).join('');
+                    `;
+                }).join('');
             } else {
                 document.getElementById('users-tbody').innerHTML =
                     '<tr><td colspan="5" class="text-center text-danger">Error loading users</td></tr>';
@@ -198,8 +221,7 @@
     function openEditUserModal(userId, name, email) {
         document.getElementById('edit-user-name').value = name;
         document.getElementById('edit-user-email').value = email;
-        document.getElementById('edit-user-password').value = '';
-        
+
         // Store ID for later use in form submission
         document.getElementById('edit-user-form').dataset.userId = userId;
 
@@ -215,12 +237,6 @@
             name: document.getElementById('edit-user-name').value,
             email: document.getElementById('edit-user-email').value
         };
-
-        // Only include password if it's not empty
-        const password = document.getElementById('edit-user-password').value;
-        if (password) {
-            formData.password = password;
-        }
 
         try {
             const response = await fetchWithAuth(`/api/users/${userId}`, {
@@ -259,7 +275,9 @@
         navbar.parentElement.insertBefore(div.firstElementChild, navbar.nextSibling);
     }
 
-    // Load users on page load
-    loadUsers();
+    // Load current user first, then load users on page load
+    getCurrentUser().then(() => {
+        loadUsers();
+    });
 </script>
 @endsection

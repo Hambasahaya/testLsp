@@ -37,9 +37,7 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Get current authenticated user
-     */
+
     public function me(Request $request)
     {
         return response()->json([
@@ -47,9 +45,7 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Logout user
-     */
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -59,9 +55,6 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Web login
-     */
     public function webLogin(Request $request)
     {
         $credentials = $request->validate([
@@ -82,9 +75,7 @@ class AuthController extends Controller
         return redirect()->intended('/');
     }
 
-    /**
-     * Web logout
-     */
+
     public function webLogout(Request $request)
     {
         auth()->logout();

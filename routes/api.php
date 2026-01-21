@@ -17,11 +17,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Product routes
     Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/stats/sales', [ProductController::class, 'salesStats']);
 
     // Admin only - create and update product
     Route::post('/products', [ProductController::class, 'store'])
         ->middleware('role:Admin');
     Route::put('/products/{product}', [ProductController::class, 'update'])
+        ->middleware('role:Admin');
+    Route::post('/products/{product}', [ProductController::class, 'update'])
+        ->middleware('role:Admin');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])
         ->middleware('role:Admin');
 
     // Admin & Seller - sell product
