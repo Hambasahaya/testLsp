@@ -1,59 +1,213 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Aplikasi Manajemen Inventaris dan Penjualan
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi Laravel untuk mengelola produk, pengguna, dan transaksi penjualan dengan sistem role-based access control.
 
-## About Laravel
+## Daftar Isi
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- [Instalasi](#instalasi)
+- [Setup Database](#setup-database)
+- [Fitur yang Telah Selesai](#fitur-yang-telah-selesai)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Instalasi
 
-## Learning Laravel
+### Prasyarat
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- PHP 8.1 atau lebih tinggi
+- Composer
+- MySQL
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Langkah-Langkah Instalasi
 
-## Laravel Sponsors
+1. **Clone atau Ekstrak Proyek**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+    ```bash
+    cd path/to/project
+    ```
 
-### Premium Partners
+2. **Install Dependensi PHP**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+    ```bash
+    composer install
+    ```
 
-## Contributing
+3. **Install Dependensi Node.js**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    ```bash
+    npm install
+    ```
 
-## Code of Conduct
+4. **Copy File Konfigurasi**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    ```bash
+    cp .env.example .env
+    ```
 
-## Security Vulnerabilities
+5. **Generate Application Key**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    ```bash
+    php artisan key:generate
+    ```
 
-## License
+6. **Konfigurasi Database**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+7. **Jalankan Migrasi Database**
+
+    ```bash
+    php artisan migrate
+    ```
+
+8. **Seed Data Awal (Opsional)**
+
+    ```bash
+    php artisan db:seed
+    ```
+
+9. **Jalankan Server Lokal**
+    ```bash
+    php artisan serve
+    ```
+    Aplikasi akan berjalan di `http://localhost:8000`
+
+---
+
+## Setup Database
+
+### Konfigurasi File `.env`
+
+Edit file `.env` di root project dengan konfigurasi database Anda:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nama_database_anda
+DB_USERNAME=root
+DB_PASSWORD=password_anda
+```
+
+### Membuat Database
+
+1. **Menggunakan MySQL CLI**
+
+    ```bash
+    mysql -u root -p
+    CREATE DATABASE nama_database_anda;
+    EXIT;
+    ```
+
+2. **Menjalankan Migrasi**
+
+    ```bash
+    php artisan migrate
+    ```
+
+    Migrasi yang akan dijalankan:
+    - Membuat tabel `users` dengan field email, password, dan role
+    - Membuat tabel `roles` untuk manajemen role/hak akses
+    - Membuat tabel `products` untuk data produk
+    - Membuat tabel `sales_transactions` untuk catatan penjualan
+    - Tabel pendukung: cache, jobs, personal access tokens
+
+3. **Seeding Data Awal (Opsional)**
+    ```bash
+    php artisan db:seed
+    ```
+    Ini akan membuat:
+    - Role dasar
+    - User contoh untuk testing
+
+---
+
+## Fitur yang Telah Selesai
+
+### 1. **Manajemen Pengguna (User Management)**
+
+- Registrasi dan login pengguna
+- Sistem role-based access control (RBAC)
+- Profile pengguna dengan role assignment
+- Autentikasi menggunakan Laravel Sanctum untuk API
+
+### 2. **Manajemen Role dan Permissions**
+
+- Tabel roles untuk mendefinisikan berbagai peran pengguna
+- Relasi antara users dan roles
+- Model Role dengan relationship ke User
+
+### 3. **Manajemen Produk**
+
+- CRUD (Create, Read, Update, Delete) untuk produk
+- Menyimpan informasi produk lengkap
+- Model Product dengan fitur inventory
+
+### 4. **Transaksi Penjualan (Sales Transactions)**
+
+- Pencatatan setiap transaksi penjualan
+- Relasi antara transaksi dengan produk dan pengguna
+- Model SalesTransaction untuk tracking penjualan
+
+### 5. **Antarmuka Web (Views)**
+
+- Dashboard untuk overview aplikasi
+- Halaman Inventory untuk manajemen produk
+- Halaman Users untuk manajemen pengguna
+- Halaman login
+- Halaman Dashboard
+- Layout responsif dengan Blade templating
+
+### 6. **Autentikasi dan Keamanan**
+
+- Authentication menggunakan Laravel auth
+- Personal Access Tokens untuk API
+- Middleware untuk proteksi route
+
+### 7. **Database Structure**
+
+- Migrasi terstruktur untuk pembuatan tabel
+- Factory untuk testing data generation
+- Seeder untuk data awal
+
+### 8. **API Endpoints**
+
+- Route API terpisah di `routes/api.php`
+- Support untuk berbagai operasi CRUD melalui REST API
+
+---
+
+## Testing
+
+Jalankan test suite dengan PHPUnit:
+
+```bash
+php artisan test
+```
+
+Atau jalankan test tertentu:
+
+```bash
+php artisan test tests/Feature/ExampleTest.php
+```
+
+---
+
+## Troubleshooting
+
+### Error: "No application encryption key has been specified"
+
+```bash
+php artisan key:generate
+```
+
+### Error: Database Connection Refused
+
+- Pastikan MySQL/database sudah berjalan
+- Verifikasi konfigurasi di file `.env`
+
+### Error: Class not found
+
+```bash
+composer dump-autoload
+```
+
+---

@@ -1,5 +1,4 @@
-#!/bin/bash
-# Test script to verify API authentication fix
+
 
 echo "Testing API Token Generation..."
 
